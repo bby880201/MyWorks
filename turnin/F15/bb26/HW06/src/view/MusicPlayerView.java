@@ -1,8 +1,6 @@
 package view;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -22,7 +20,7 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EtchedBorder;
 
-public class MusicPlayerView extends JFrame {
+public class MusicPlayerView<T> extends JFrame {
 
 	/**
 	 * 
@@ -34,7 +32,7 @@ public class MusicPlayerView extends JFrame {
 	private JLabel lblFile;
 	private JButton btnLoad;
 	private JButton btnParse;
-	private JComboBox lstInstrument;
+	private JComboBox<T> lstInstrument;
 	private JButton btnPlay;
 	private JButton btnStop;
 	private JSplitPane pnlSplit;
@@ -42,22 +40,6 @@ public class MusicPlayerView extends JFrame {
 	private JScrollPane spnlParsed;
 	private JTextArea taContent;
 	private JTextArea taParsed;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					MusicPlayerView frame = new MusicPlayerView();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
 	/**
 	 * Create the frame.
@@ -104,7 +86,7 @@ public class MusicPlayerView extends JFrame {
 		btnParse.setToolTipText("parse abc file");
 		pnlControl.add(btnParse);
 		
-		lstInstrument = new JComboBox();
+		lstInstrument = new JComboBox<T>();
 		lstInstrument.setToolTipText("select an instrument to play");
 		pnlControl.add(lstInstrument);
 		
@@ -158,6 +140,10 @@ public class MusicPlayerView extends JFrame {
 		taParsed.setLineWrap(true);
 		spnlParsed.setViewportView(taParsed);
 		pnlRoot.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{tfFileName, btnLoad, btnParse, lstInstrument, btnPlay, btnStop}));
+	}
+
+	public void start() {
+		setVisible(true);
 	}
 
 }
