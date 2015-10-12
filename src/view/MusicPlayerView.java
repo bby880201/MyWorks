@@ -40,11 +40,16 @@ public class MusicPlayerView<T> extends JFrame {
 	private JScrollPane spnlParsed;
 	private JTextArea taContent;
 	private JTextArea taParsed;
-
+	private IView2ModelAdapter v2mAdapter;
+	
+	public MusicPlayerView(IView2ModelAdapter v2m){
+		this.init();
+		this.v2mAdapter = v2m;
+	}
 	/**
 	 * Create the frame.
 	 */
-	public MusicPlayerView() {
+	public void init() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 600);
 		pnlRoot = new JPanel();

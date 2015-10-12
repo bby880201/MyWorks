@@ -5,7 +5,8 @@ package controller;
 
 import java.awt.EventQueue;
 
-import view.MusicPlayerView;
+import model.*;
+import view.*;
 
 /**
  * @author Boyang Bai
@@ -14,14 +15,16 @@ import view.MusicPlayerView;
 public class Controller {
 	
 	private MusicPlayerView<Object> view;
+	private MusicPlayerModel model;
 	
 	public Controller(){
 		
-		view = new MusicPlayerView<Object>();
+		view = new MusicPlayerView<Object>(new IView2ModelAdapter(){});
+		model = new MusicPlayerModel(new IModel2ViewAdapter(){});
 	}
 	
 	void start() {
-//		model.start();
+		model.start();
 		view.start();
 	}
 	
