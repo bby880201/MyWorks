@@ -19,8 +19,35 @@ public class Controller {
 	
 	public Controller(){
 		
-		view = new MusicPlayerView<Object>(new IView2ModelAdapter(){});
-		model = new MusicPlayerModel(new IModel2ViewAdapter(){});
+		view = new MusicPlayerView<Object>(new IView2ModelAdapter(){
+
+			@Override
+			public String loadFile(String fileName) {
+				return model.loadFile(fileName);
+			}
+
+			@Override
+			public String parse() {
+				return model.parse();
+			}
+
+			@Override
+			public void play() {
+				model.play();
+			}
+
+			@Override
+			public void stop() {
+				model.stop();
+			}});
+		model = new MusicPlayerModel(new IModel2ViewAdapter(){
+
+			@Override
+			public void finished() {
+				view.finished();
+			}
+			
+		});
 	}
 	
 	void start() {

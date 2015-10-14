@@ -20,7 +20,7 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EtchedBorder;
 
-public class MusicPlayerView<T> extends JFrame {
+public class MusicPlayerView<TInstrument> extends JFrame {
 
 	/**
 	 * 
@@ -32,7 +32,7 @@ public class MusicPlayerView<T> extends JFrame {
 	private JLabel lblFile;
 	private JButton btnLoad;
 	private JButton btnParse;
-	private JComboBox<T> lstInstrument;
+	private JComboBox<TInstrument> lstInstrument;
 	private JButton btnPlay;
 	private JButton btnStop;
 	private JSplitPane pnlSplit;
@@ -76,6 +76,7 @@ public class MusicPlayerView<T> extends JFrame {
 		btnLoad.setToolTipText("load abc file");
 		btnLoad.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				taContent.setText(v2mAdapter.loadFile("/songs/" + tfFileName.getText() + ".abc"));
 				btnParse.setEnabled(true);
 			}
 		});
@@ -84,6 +85,7 @@ public class MusicPlayerView<T> extends JFrame {
 		btnParse = new JButton("Parse");
 		btnParse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				taParsed.setText(v2mAdapter.parse());
 				btnParse.setEnabled(false);
 			}
 		});
@@ -91,13 +93,14 @@ public class MusicPlayerView<T> extends JFrame {
 		btnParse.setToolTipText("parse abc file");
 		pnlControl.add(btnParse);
 		
-		lstInstrument = new JComboBox<T>();
+		lstInstrument = new JComboBox<TInstrument>();
 		lstInstrument.setToolTipText("select an instrument to play");
 		pnlControl.add(lstInstrument);
 		
 		btnPlay = new JButton("Play");
 		btnPlay.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				v2mAdapter.play();
 				btnStop.setEnabled(true);
 			}
 		});
@@ -107,6 +110,7 @@ public class MusicPlayerView<T> extends JFrame {
 		btnStop = new JButton("Stop");
 		btnStop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				v2mAdapter.stop();
 				btnStop.setEnabled(false);
 			}
 		});
@@ -149,6 +153,9 @@ public class MusicPlayerView<T> extends JFrame {
 
 	public void start() {
 		setVisible(true);
+	}
+	public void finished() {
+		btnStop.setEnabled(false);
 	}
 
 }
