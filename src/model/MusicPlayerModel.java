@@ -13,7 +13,8 @@ import provided.music.NESeqList;
 import provided.music.Note;
 import provided.music.Triplet;
 import provided.player.ISequencePlayerStatus;
-import provided.player.SequencePlayer;
+import provided.player.SequencePlayer2;
+import provided.player.SequencePlayer2.IPlayable;
 import provided.util.ABCInstrument;
 import provided.util.ABCUtil;
 import provided.util.KeySignature;
@@ -42,7 +43,7 @@ public class MusicPlayerModel {
 	/**
 	 * a player used to play parsed abc file
 	 */
-	private SequencePlayer sp;
+	private SequencePlayer2 sp;
 
 	/**
 	 * represent a parsed abc file
@@ -58,11 +59,16 @@ public class MusicPlayerModel {
 	 * a visitor containing toString algorithm
 	 */
 	private IPhraseVisitor toStringAlgo;
+	
+	/**
+	 * a playable music
+	 */
+	private IPlayable music;
 
 	/**
 	 * the model constructor taking the model to view adapter
 	 * @param m2v		an implemented model to view adapter
-	 */
+	 */	
 	public MusicPlayerModel(IModel2ViewAdapter m2v) {
 		this.m2vAdapter = m2v;
 	}
@@ -71,8 +77,8 @@ public class MusicPlayerModel {
 	 * start the model
 	 */
 	public void start() {
-		sp = new SequencePlayer(16, 0);
-
+		sp = new SequencePlayer2(16, 0);
+		music = IPlayable.NULL;
 		//init a default to string algo visitor
 		toStringAlgo = new IPhraseVisitor() {
 			@Override
@@ -102,12 +108,23 @@ public class MusicPlayerModel {
 			private IPhraseVisitorCmd defaultCmd;
 			private Map<String, IPhraseVisitorCmd> cmds = new Hashtable<String, IPhraseVisitorCmd>();
 			{
+				defaultCmd = new IPhraseVisitorCmd(){
+
+					@Override
+					public Object apply(String id, IPhrase host,
+							Object... params) {
+						System.err.println("Unknown phrase type: " + host.toString());
+						return null;
+					}
+				};
+				
 				this.addCmd("MTSeqList", new IPhraseVisitorCmd() {
 					@Override
 					public Object apply(String id, IPhrase host,
 							Object... params) {
-						((SequencePlayer) params[0])
-								.play(new ISequencePlayerStatus() {
+						
+						music = ((SequencePlayer2) params[0])
+								.makePlayable(new ISequencePlayerStatus() {
 									@Override
 									public void finished() {
 										m2vAdapter.finished();
@@ -130,7 +147,7 @@ public class MusicPlayerModel {
 					@Override
 					public Object apply(String id, IPhrase host,
 							Object... params) {
-						params[1] = ((SequencePlayer) params[0]).addNote(
+						params[1] = ((SequencePlayer2) params[0]).addNote(
 								((KeySignature) params[2]).adjust((Note) host),
 								(int) params[1]);
 						return params;
@@ -142,7 +159,7 @@ public class MusicPlayerModel {
 							Object... params) {
 						int next = (int) params[1];
 						for (Note n : ((Chord) host).getNotes()) {
-							next = ((SequencePlayer) params[0]).addNote(
+							next = ((SequencePlayer2) params[0]).addNote(
 									((KeySignature) params[2]).adjust(n),
 									(int) params[1]);
 						}
@@ -156,7 +173,7 @@ public class MusicPlayerModel {
 							Object... params) {
 						for (Note n : ((Triplet) host).getNotes()) {
 							n.setDuration(n.getDuration() * 2 / 3);
-							params[1] = ((SequencePlayer) params[0]).addNote(
+							params[1] = ((SequencePlayer2) params[0]).addNote(
 									((KeySignature) params[2]).adjust(n),
 									(int) params[1]);
 						}
@@ -167,7 +184,7 @@ public class MusicPlayerModel {
 					@Override
 					public Object apply(String id, IPhrase host,
 							Object... params) {
-						((SequencePlayer) params[0])
+						((SequencePlayer2) params[0])
 								.setTicksPerDefaultNote((int) parseL(((Header) host)
 										.getValue()));
 						return params;
@@ -185,7 +202,7 @@ public class MusicPlayerModel {
 					@Override
 					public Object apply(String id, IPhrase host,
 							Object... params) {
-						SequencePlayer sp = ((SequencePlayer) params[0]);
+						SequencePlayer2 sp = ((SequencePlayer2) params[0]);
 						sp.setTempo((int) abcUtil.parseTempo(((Header) host)
 								.getValue(), (sp.getTicksPerQuarterNote() / sp
 								.getTicksPerDefaultNote())));
@@ -254,8 +271,11 @@ public class MusicPlayerModel {
 	 * @param ist			the instrument used to play
 	 */
 	public void play(ABCInstrument ist) {
+		//stop previously played music firstß
+		music.stop();
 		sp.init(16, ist.getValue());
-		phrase.execute(playAlgo, sp, 10, new KeySignature("C"));
+		phrase.execute(playAlgo, sp, 1, new KeySignature("C"));
+		music.start();
 	}
 
 	/**
@@ -278,6 +298,6 @@ public class MusicPlayerModel {
 	 * stop playing the phrase
 	 */
 	public void stop() {
-		sp.stop();
+		music.stop();
 	}
 }
